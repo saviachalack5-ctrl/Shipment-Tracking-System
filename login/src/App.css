@@ -1,0 +1,466 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap');
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Montserrat", sans-serif;
+}
+
+.login-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.login-left {
+  flex: 1;
+  background: url('/logos/shipments.png') center center/cover no-repeat;
+  position: relative;
+}
+/* 
+.welcome-text {
+  text-align: center;
+   margin-bottom: 2rem;
+/* }
+
+.welcome-text h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-text p {
+  font-size: 1.1rem;
+  color: #666;
+} */
+
+
+.login-left h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.login-left p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.login-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.form-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: .5rem;
+}
+
+.form-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.separator {
+  text-align: center;
+  margin: 1rem 0;
+  position: relative;
+  font-weight: 500;
+  color: #6652BE;
+}
+
+.separator::after {
+  content: "";
+  height: 1px;
+  width: 100%;
+  background: #bfb3f2;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: -1;
+}
+
+.separator span {
+  background: white;
+  padding: 0 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 1.2rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  border: 1px solid #bfb3f2;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.input-field:focus {
+  border-color: #5F41E4;
+  outline: none;
+}
+
+.input-field::placeholder {
+  color: #9284c8;
+}
+
+.input-wrapper i {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  color: #a395e0;
+  pointer-events: none;
+}
+
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.login-options a {
+  color: #ffcc00;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #ffcc00;
+  color: #0b1f3a;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.login-button:hover {
+  background: #e6b800;
+}
+
+/* 
+.signup-text {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.signup-link {
+  color: #5F41E4;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+} */
+
+.error {
+  color: red;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+
+/* 
+.feedback-input:focus{
+  outline: 2px solid #0000FF;
+}
+
+.feedback-input::placeholder{
+  text-align: left;
+} */
+
+
+.navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  height: 65px;
+  width: 100%;
+  background-color: #001f3f; 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  box-sizing: border-box;
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-family: "Inter", sans-serif;
+}
+
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo {
+  width: 28px;
+  height: 28px;
+}
+
+.navbar-title {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #ffc300; 
+}
+
+
+.navbar-links {
+  display: flex;
+  gap: 35px;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.nav-link.active {
+  background-color: #ffc300;
+  color: #001f3f;
+  font-weight: 600;
+}
+
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-user-name {
+  margin-right: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: white;
+}
+
+.user-icon {
+  color: white;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.user-icon:hover {
+  color: #ffc300;
+}
+
+.SideBar-link {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 10px 0;
+  width: 100%;
+  transition: color 0.3s;
+}
+
+.SideBar-link:hover {
+  color: #ffc300;
+}
+
+.sidebar-container {
+  width: 250px;
+  height: 100%;
+  background-color: #1e1e2f;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.Side-bar{
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.sidebar-profile {
+  padding: 20px;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.sidebar-role {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-logout {
+  margin: 0 20px 20px;
+  width: calc(100% - 40px);
+  padding: 10px 14px;
+  background-color: #f87171;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  margin-top: auto;
+}
+
+.sidebar-logout:hover {
+  background-color: #ef4444;
+}
+
+.navbar-links {
+  gap: 20px;
+}
+.navbar-title {
+  font-size: 1.1rem;
+}
+
+
+.add-shipment-dialog {
+  font-family: "Montserrat", sans-serif;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-radius: 15px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  color: #0b1f3a;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 90vh; 
+  overflow: visible;
+}
+
+.add-shipment-dialog h2 {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: "black";
+  text-align: center;
+}
+
+.add-shipment-dialog label {
+  display: block;
+  font-weight: 500;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  color: #facc15; 
+}
+
+
+.add-shipment-dialog button.add-btn {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background-color: #ffcc00;
+  color: #0b1f3a;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.add-shipment-dialog button.add-btn:hover {
+  background-color: #e6b800;
+}
+
+
+.add-user-dialog {
+  font-family: "Montserrat", sans-serif;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-radius: 15px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  color: #0b1f3a;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 90vh; 
+  overflow: visible;
+}
+
+.add-user-dialog h2 {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: "black";
+  text-align: center;
+}
+
+.add-user-dialog label {
+  display: block;
+  font-weight: 500;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  color: "gray"; 
+}
+
+.add-user-dialog button.add-btn {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background-color: #ffcc00;
+  color: #0b1f3a;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+
+.add-user-dialog button.add-btn:hover {
+  background-color: #e6b800;
+}
