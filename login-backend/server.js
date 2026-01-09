@@ -88,6 +88,22 @@ app.get("/users", authenticateRequest, requireAdmin, async (req, res) => {
   res.json({ users });
 });
 
+app.delete("/users/:id", authenticateRequest, requireAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const { error } = await supabase.auth.admin.deleteUser(userId);
+
+    if (error) {
+      return res.status(400).json({ message: error.message || "Unable to delete user" });
+    }
+
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    return res.status(500).json({ message: "Server error deleting user" });
+  }
+});
 
 app.post("/users", authenticateRequest, requireAdmin, async (req, res) => {
   const { email, password, role = "user", name = "" } = req.body || {};

@@ -61,7 +61,8 @@ const News = ({ toggleTheme, mode }) => {
   return (
     <div
       style={{
-        maxWidth: "1300px",
+        height: "80vh", 
+        width: "100%",
         marginTop: "0 auto",
         padding: "20px",
         display: "flex",
@@ -85,9 +86,10 @@ const News = ({ toggleTheme, mode }) => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(250px, auto))",
             gap: "20px",
             width: "100%",
+            justifyContent: "start", 
           }}
         >
           {news.map((item, index) => (

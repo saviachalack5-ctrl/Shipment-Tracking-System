@@ -82,7 +82,23 @@ const handleArchive = (row) => {
   localStorage.setItem("archivedShipments", JSON.stringify(updatedArchived));
 };
 
+const handleRestore = (row) => {
 
+  const updatedArchived = archivedShipments.filter(
+    (s) => `${s.mmsi}-${s.id}` !== `${row.mmsi}-${row.id}`
+  );
+  setArchivedShipments(updatedArchived);
+  localStorage.setItem("archivedShipments", JSON.stringify(updatedArchived));
+
+  const updatedShipments = [...shipmentList, row];
+  setShipmentList(updatedShipments);
+  localStorage.setItem("shipments", JSON.stringify(updatedShipments));
+};
+
+useEffect(() => {
+  const storedArchived = JSON.parse(localStorage.getItem("archivedShipments") || "[]");
+  setArchivedShipments(storedArchived);
+}, []);
 
   const getStatus = (deliveryTime) => {
     if (!deliveryTime) return "Pending";
@@ -215,12 +231,15 @@ const handleArchive = (row) => {
     ...(userSettings.status ? [{ label: "Status", field: "status" }] : []),
   ];
 
+  
+
   return (
     <div
       style={{
         paddingTop: "40px",
         paddingLeft: "40px",
-        maxWidth: "1300px",
+        height: "80vh", 
+        width: "100%",
         marginInline: "auto",
       }}
     >

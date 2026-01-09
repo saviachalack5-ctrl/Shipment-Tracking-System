@@ -4,6 +4,7 @@ import { Chip } from "@mui/material";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExportButtons from "./ExportButtons";
 import { useAuth } from "./AuthContext";
+import {Typography } from "@mui/material";
 
 
 const ArchivedShipments = ({ mode, userSettings }) => {
@@ -70,14 +71,19 @@ useEffect(() => {
 };
 
 
-  const handleRestore = (row) => {
-    const updated = shipmentList.filter(
-      (s) => `${s.mmsi}-${s.id}` !== `${row.mmsi}-${row.id}`
-    );
-    setShipmentList(updated);
+const handleRestore = (row) => {
+  // 1️⃣ Remove from archivedShipments
+  const updatedArchived = JSON.parse(localStorage.getItem("archivedShipments") || "[]")
+    .filter(s => `${s.mmsi}-${s.id}` !== `${row.mmsi}-${row.id}`);
+  localStorage.setItem("archivedShipments", JSON.stringify(updatedArchived));
 
-    localStorage.setItem("archivedShipments", JSON.stringify(updated));
-  };
+
+  const currentShipments = JSON.parse(localStorage.getItem("shipments") || "[]");
+  const updatedShipments = [...currentShipments, row];
+  localStorage.setItem("shipments", JSON.stringify(updatedShipments));
+
+  setShipmentList(updatedArchived); 
+};
 
   const columns = [
     { field: "mmsi", headerName: "Ship MMSI", width: 200 },
@@ -135,8 +141,10 @@ useEffect(() => {
   ];
 
   return (
-    <div style={{ paddingTop: "40px", paddingLeft: "40px", maxWidth: "1300px", marginInline: "auto" }}>
-      <h2 style={{ fontSize: "24px", fontWeight: "600", marginBottom: "20px" }}>Archived Shipments</h2>
+    <div style={{ paddingTop: "20px", paddingLeft: "20px", marginInline: "auto", height: "80vh", width: "100%", }}>
+      <Typography variant="h4" sx={{ mb: .5}}>
+        Archived Shipments
+      </Typography>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
         <ExportButtons
           data={shipmentList}

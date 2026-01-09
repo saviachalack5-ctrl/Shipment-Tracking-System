@@ -6,6 +6,7 @@ import {Typography } from "@mui/material";
 import AddUsers from "./AddUsers";
 import { useAuth } from "./AuthContext";
 import { API_BASE_URL } from "./config";
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const Users = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -125,9 +126,42 @@ const Users = () => {
     }
   };
 
+  const handleDeleteUser = async (userId) => {
+  if (!auth?.access_token) return;
+
+  const confirmed = window.confirm("Are you sure you want to delete this user?");
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${auth.access_token}`,
+      },
+    });
+
+    // Safely parse JSON only if it exists
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (err) {
+      // the API returned no body — ignore
+    }
+
+    if (!response.ok) {
+      throw new Error(data?.message || "Unable to delete user");
+    }
+
+    // Remove user from state
+    setUsers((prev) => prev.filter((user) => user.id !== userId));
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
   return (
-    <div style={{ padding: "20px" }}>
-      <Typography variant="h4" sx={{ mb: 1 }}>
+    <div style={{ padding: "20px", height: "80vh", width: "100%"}}>
+      <Typography variant="h4" sx={{ mb: .5 }}>
           Users Overview
       </Typography>
 
@@ -198,16 +232,33 @@ const Users = () => {
                 marginBottom: "10px",
                 borderLeft: "5px solid #facc15",
                 cursor: "pointer",
-              }}
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+            }}
             >
+              <div>
               <p style={{ margin: "0", fontWeight: "600" }}>{user.name}</p>
               <p style={{ margin: "2px 0", color: "#555" }}>{user.email}</p>
               <p style={{ margin: "0", color: "#888" }}>{user.role}</p>
+              </div>
+              
+               <DeleteOutlineIcon
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent selecting user
+                    handleDeleteUser(user.id);
+                  }}
+                  style={{ color: "#d12b2bff", cursor: "pointer", marginRight: "100px" }}
+                />
             </div>
+            
           ))
+          
         ) : (
           <p style={{ color: "#888" }}>No users found.</p>
         )}
+        
+       
       </div>
 
       <AddUsers open={openAddDialog} onClose={handleCloseDialog} onSubmit={handleAddUser} />
@@ -260,6 +311,7 @@ const Users = () => {
                   style={{ marginRight: "10px" }}
                 />
                 {key.charAt(0).toUpperCase() + key.slice(1)}
+
               </label>
             ))}
 
