@@ -2,7 +2,7 @@ Shipment Tracking System
 
 This project is a shipment tracking system built with React for the frontend and Node.js for the backend. 
 It supports role-based access, admin-controlled user management, and shipment tracking functionality. 
-The system was designed to reflect real application structure rather than a simple demo or static interface.
+The system is runned locally and not hosted and is expandable.
 
 Project Overview:
 
@@ -28,6 +28,14 @@ This script promotes the selected user to admin status.
 Only an existing admin can add new users and manage admin-level functionality.
 Access control is enforced by backend checks and by conditional rendering on the frontend. 
 Admin-only components are hidden from regular users and cannot be accessed without proper authorization.
+
+To use the access control:
+
+The user must be in the admin dashboard and create other users.
+By clicking on the profile icon on the top right a side bar will show.
+go to Users and make a second user account, then click on the user you made and you will see a list of checkboxes which are components of the website.
+You can uncheck any component and it won't show from that end user's side.
+This can be verified by logging out and logging in as the user.
 
 Features:
 
