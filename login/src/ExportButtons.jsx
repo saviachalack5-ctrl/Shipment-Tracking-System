@@ -1,9 +1,7 @@
 import React from "react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import { FileSpreadsheet, Download } from "lucide-react";
-
 
 const today = new Date().toLocaleDateString("en-GB", {
   day: "2-digit",
@@ -42,30 +40,33 @@ const ExportButtons = ({
 
     let y;
 
-    const headerImg = new Image();
-    headerImg.src = "/shipment.png";
-    await new Promise((r) => (headerImg.onload = r));
-
+    
     const drawHeader = () => {
-      const imgWidth = pageWidth;
-      const imgHeight = (headerImg.height / headerImg.width) * imgWidth;
+      const headerTop = 15;
+      
+      
+      pdf.setFontSize(16);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(fileName.replace(/_/g, " "), 10, headerTop);
 
-      pdf.addImage(headerImg, "PNG", 0, 0, imgWidth, imgHeight);
-
-
+      
       pdf.setFontSize(10);
-      pdf.text(`Date: ${today}`, pageWidth - 40, imgHeight - 8);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Date: ${today}`, pageWidth - 45, headerTop);
 
-      return imgHeight; // return actual header height
+      
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(10, headerTop + 5, pageWidth - 10, headerTop + 5);
+
+      return headerTop + 10; 
     };
-
 
     let headerHeight = drawHeader();
 
-
-    y = headerHeight + 10;
+    y = headerHeight + 5;
 
     pdf.setFontSize(11);
+    pdf.setFont("helvetica", "bold");
     let x = 10;
     columns.forEach((col) => {
       pdf.text(col.label, x, y);
@@ -75,15 +76,16 @@ const ExportButtons = ({
     y += 8;
 
     pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
 
     for (let i = 0; i < data.length; i++) {
       if (y + rowHeight > pageHeight - 10) {
         pdf.addPage();
         headerHeight = drawHeader();
-        y = headerHeight + 10;
-
+        y = headerHeight + 5;
 
         pdf.setFontSize(11);
+        pdf.setFont("helvetica", "bold");
         let xTitle = 10;
         columns.forEach((col) => {
           pdf.text(col.label, xTitle, y);
@@ -91,6 +93,7 @@ const ExportButtons = ({
         });
         y += 8;
         pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
       }
 
       let xRow = 10;
@@ -104,7 +107,6 @@ const ExportButtons = ({
 
     pdf.save(`${fileName}.pdf`);
   };
-
 
   return (
     <div style={{ display: "flex", gap: "10px" }}>

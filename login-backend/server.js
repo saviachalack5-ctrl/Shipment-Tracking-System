@@ -72,6 +72,106 @@ app.post("/login", async (req, res) => {
   });
 });
 
+app.get("/shipments", authenticateRequest, async (req, res) => { 
+  try {
+    const { data, error } = await supabase
+      .from("shipments")
+      .select("*")
+      .eq('is_archived', false);
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch shipments" });
+  }
+});
+
+app.get("/shipments/archived", authenticateRequest, async (req, res) => { 
+  try {
+    const { data, error } = await supabase
+      .from("shipments")
+      .select("*")
+      .eq('is_archived', true); 
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch archived shipments" });
+  }
+});
+
+
+
+app.post("/shipments", async (req, res) => {
+  const { id, time, mmsi, bol } = req.body;
+  const { data, error } = await supabase
+    .from("shipments")
+    .insert([{ id, time, mmsi, bol, is_archived: false }])
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+
+app.patch("/shipments/:id/archive", authenticateRequest, async (req, res) => {
+  const { id } = req.params;
+  const { error } = await supabase
+    .from("shipments")
+    .update({ is_archived: true })
+    .eq("id", id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ message: "Shipment archived successfully" });
+});
+
+
+app.patch("/settings/:userId", authenticateRequest, async (req, res) => {
+  const { userId } = req.params;
+  const { newSettings } = req.body; 
+
+  try {
+    
+    const { data: currentData, error: fetchError } = await supabase
+      .from("user_settings")
+      .select("settings")
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    
+    const updatedSettings = { ...currentData.settings, ...newSettings };
+
+    
+    const { data, error: updateError } = await supabase
+      .from("user_settings")
+      .update({ settings: updatedSettings })
+      .eq("user_id", userId)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    res.json({ message: "Settings updated", settings: data.settings });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+app.patch("/shipments/:id/restore", authenticateRequest, async (req, res) => {
+  const { id } = req.params;
+  const { error } = await supabase
+    .from("shipments")
+    .update({ is_archived: false })
+    .eq("id", id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ message: "Shipment restored successfully" });
+});
+
 
 app.get("/users", authenticateRequest, requireAdmin, async (req, res) => {
   const { data, error } = await supabase.auth.admin.listUsers();
@@ -106,11 +206,13 @@ app.delete("/users/:id", authenticateRequest, requireAdmin, async (req, res) => 
 });
 
 app.post("/users", authenticateRequest, requireAdmin, async (req, res) => {
-  const { email, password, role = "user", name = "" } = req.body || {};
+  const { email, password, role = "user", name = "" } = req.body;
 
-  if (!email || !password) return res.status(400).json({ message: "Email and password are required" });
+  if (!email || !password)
+    return res.status(400).json({ message: "Email and password are required" });
 
   try {
+    
     const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -118,21 +220,65 @@ app.post("/users", authenticateRequest, requireAdmin, async (req, res) => {
       user_metadata: { role, name },
     });
 
-    if (error) return res.status(400).json({ message: error.message || "Unable to create user" });
+    if (error) return res.status(400).json({ message: error.message });
+
+    const newUserId = data.user.id;
+
+    
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert([{ 
+        user_id: newUserId, 
+        email: email, 
+        full_name: name, 
+        role: role,
+        created_by: req.user.id, 
+        created_by_admin: true
+      }]);
+
+    if (profileError) {
+      console.error("Profile Error:", profileError.message);
+      
+    }
+
+    
+    const { error: settingsError } = await supabase
+      .from("user_settings")
+      .insert([
+        {
+          user_id: newUserId,
+          settings: {
+            status: true,
+            Actions: true,
+            AddShipment: true,
+            EstimatedTime: true,
+            News: true,
+            Report: true,
+            Archives: true,
+          },
+        },
+      ]);
+
+    if (settingsError) {
+      console.error("Settings Error:", settingsError.message);
+    }
 
     return res.status(201).json({
-      message: "User created successfully",
+      message: "User and Settings created successfully",
       user: {
-        id: data.user.id,
-        email: data.user.email,
-        role: data.user.user_metadata?.role || role,
-        name: data.user.user_metadata?.name || name,
+        id: newUserId,
+        email,
+        role,
+        name,
       },
     });
   } catch (err) {
+    console.error("Global User creation error:", err);
     return res.status(500).json({ message: err.message });
   }
 });
+
+
 
 
 app.get("/users/public", async (req, res) => {
@@ -177,30 +323,35 @@ app.get("/settings/:userId", authenticateRequest, async (req, res) => {
   res.json({ settings });
 });
 
+
 app.post("/settings/:userId", authenticateRequest, async (req, res) => {
   const { userId } = req.params;
   const { settings } = req.body;
 
   if (!settings || typeof settings !== "object") {
-    return res.status(400).json({ message: "Invalid settings" });
+    return res.status(400).json({ message: "Invalid settings object" });
   }
 
   if (req.user.id !== userId && req.user.user_metadata.role !== "admin") {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  const { data, error } = await supabase
-    .from("user_settings")
-    .upsert({ user_id: userId, settings })
-    .select()
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("user_settings")
+      .upsert({ user_id: userId, settings }, { onConflict: "user_id" })
+      .select()
+      .single();
 
-  if (error) {
-    return res.status(500).json({ message: error.message });
+    if (error) throw error;
+
+    return res.json({ message: "Settings updated", settings: data.settings });
+  } catch (err) {
+    console.error("Failed to upsert settings:", err);
+    return res.status(500).json({ message: err.message });
   }
-
-  res.json({ message: "Settings updated", settings: data.settings });
 });
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => console.log(`Server running on http://localhost:${PORT}`));

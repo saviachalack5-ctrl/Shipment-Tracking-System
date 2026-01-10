@@ -10,28 +10,57 @@ import {
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close"; 
+import { API_BASE_URL } from "./config";
 
 
-const ShipmentDialog = ({ open, onClose, onAdd }) => {
+const ShipmentDialog = ({ open, onClose, onAdd, auth }) => {
   const [mmsi, setMmsi] = useState("");
   const [bol, setBol] = useState("");
   const [id, setId] = useState("");
   const [time, setTime] = useState("");
 
-  const handleAdd = () => {
-    if (!id || !mmsi || !bol || !time) {
-      alert("Please fill all fields");
+const handleAdd = async () => {
+  // Validate
+  if (!id || !mmsi || !bol || !time) {
+    alert("All fields are required");
+    return;
+  }
+
+  // Convert id to number (bigint)
+  const newShipment = {
+    id: Number(id),
+    mmsi,
+    bol,
+    time, // must be YYYY-MM-DD
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/shipments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth.access_token}`,
+      },
+      body: JSON.stringify(newShipment),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Server returned error:", text);
+      alert(`Failed to add shipment: ${text}`);
       return;
     }
 
-    const newShipment = { id, mmsi, bol, time };
-    onAdd(newShipment); 
-    onClose(); 
-    setMmsi("");
-    setBol("");
-    setId("");
-    setTime("");
-  };
+    const data = await res.json();
+    onAdd(data); // pass to parent
+    setId(""); setMmsi(""); setBol(""); setTime("");
+  } catch (err) {
+    console.error("Failed to add shipment", err);
+    alert("Failed to add shipment. Check console for details.");
+  }
+};
+
+
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -150,6 +179,7 @@ const ShipmentDialog = ({ open, onClose, onAdd }) => {
                 color: "#000",
                 fontWeight: 600,
                 padding: "12px",
+                paddingBottom: "14px",
                 textTransform: "none",
                 borderRadius: "10px",
                 "&:hover": { backgroundColor: "#fbbf24" },

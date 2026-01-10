@@ -12,7 +12,6 @@ import { API_BASE_URL } from "./config";
 
 const Shipments = ({ toggleTheme, mode }) => {
   const { auth } = useAuth();
-
   const [shipmentList, setShipmentList] = useState([]);
   const [archivedShipments, setArchivedShipments] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,93 +28,126 @@ const Shipments = ({ toggleTheme, mode }) => {
 
 
   useEffect(() => {
-    const loadSettings = async () => {
-      setLoadingSettings(true);
-      try {
-        const saved = localStorage.getItem(`user_components_${auth.user.id}`);
-        if (saved) {
-          setUserSettings(JSON.parse(saved));
-        } else {
-          const res = await fetch(`${API_BASE_URL}/settings/${auth.user.id}`, {
-            headers: { Authorization: `Bearer ${auth.access_token}` },
-          });
-          const data = await res.json();
-          setUserSettings(data.settings);
-        }
-      } catch (err) {
-        console.error(err);
-        setUserSettings({
-          AddShipment: true,
-          Actions: true,
-          EstimatedTime: true,
-          status: true,
-        });
-      } finally {
-        setLoadingSettings(false);
-      }
-    };
-    loadSettings();
-  }, [auth]);
+  const loadSettings = async () => {
+    setLoadingSettings(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/settings/${auth.user.id}`, {
+        headers: { Authorization: `Bearer ${auth.access_token}` },
+      });
+      const data = await res.json();
 
-useEffect(() => {
- 
-  const storedShipments = JSON.parse(localStorage.getItem("shipments") || "[]");
-  const merged = [...shipments];
+      const settings = data.settings || {
+        AddShipment: true,
+        News: true,
+        Report: true,
+        Actions: true,
+        EstimatedTime: true,
+        status: true,
+      };
 
-  storedShipments.forEach((s) => {
-    if (!merged.some((m) => m.id === s.id)) {
-      merged.push(s);
+      setUserSettings(settings);
+
+
+      localStorage.setItem(`user_components_${auth.user.id}`, JSON.stringify(settings));
+    } catch (err) {
+      console.error(err);
+      setUserSettings({
+        AddShipment: true,
+        Actions: true,
+        EstimatedTime: true,
+        status: true,
+        Report: true,
+        News: true,
+        Archives: true
+      });
+    } finally {
+      setLoadingSettings(false);
     }
-  });
+  };
 
-  setShipmentList(merged);
-  localStorage.setItem("shipments", JSON.stringify(merged));
-}, []);
+  if (auth?.user?.id) loadSettings();
+}, [auth?.user?.id, auth?.access_token]);
+
+ 
+  useEffect(() => {
+  if (!auth?.access_token) return; 
+  const fetchShipments = async () => {
+    try {
+      const headers = {};
+
+    if (auth?.access_token) {
+      headers.Authorization = `Bearer ${auth.access_token}`;
+    }
+
+    const res = await fetch(`${API_BASE_URL}/shipments`, { headers });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Failed to fetch shipments:", res.status, text);
+        setShipmentList([]); 
+        return;
+      }
+
+      const data = await res.json();
+      setShipmentList(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to fetch shipments", err);
+      setShipmentList([]);
+    }
+  };
+
+  fetchShipments();
+}, [auth?.access_token]);
 
 
-const handleArchive = (row) => {
-  setShipmentList((prev) => prev.filter((s) => s.id !== row.id));
 
+const handleArchive = async (row) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/shipments/${row.id}/archive`, { 
+      method: "PATCH", 
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${auth.access_token}` 
+      }
+    });
 
-  const archived = JSON.parse(localStorage.getItem("archivedShipments") || "[]");
-  const updatedArchived = [...archived, row];
-  localStorage.setItem("archivedShipments", JSON.stringify(updatedArchived));
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error("Server rejected archive:", errorData);
+      return;
+    }
+
+    
+    setShipmentList(prev => prev.filter(s => s.id !== row.id));
+    setArchivedShipments(prev => [...prev, row]);
+  } catch (err) {
+    console.error("Archive request failed:", err);
+  }
 };
 
-const handleRestore = (row) => {
-
-  const updatedArchived = archivedShipments.filter(
-    (s) => `${s.mmsi}-${s.id}` !== `${row.mmsi}-${row.id}`
-  );
-  setArchivedShipments(updatedArchived);
-  localStorage.setItem("archivedShipments", JSON.stringify(updatedArchived));
-
-  const updatedShipments = [...shipmentList, row];
-  setShipmentList(updatedShipments);
-  localStorage.setItem("shipments", JSON.stringify(updatedShipments));
-};
-
-useEffect(() => {
-  const storedArchived = JSON.parse(localStorage.getItem("archivedShipments") || "[]");
-  setArchivedShipments(storedArchived);
-}, []);
 
   const getStatus = (deliveryTime) => {
     if (!deliveryTime) return "Pending";
+
     const today = new Date();
     const deliveryDate = new Date(deliveryTime);
+
     today.setHours(0, 0, 0, 0);
     deliveryDate.setHours(0, 0, 0, 0);
+
     if (deliveryDate.toDateString() === today.toDateString()) return "Docked";
     if (deliveryDate < today) return "Overdue";
     if (deliveryDate > today) return "In Transit";
+
     return "Pending";
   };
 
-  const shipmentsWithStatus = shipmentList.map((s) => ({
-    ...s,
-    status: getStatus(s.time),
-  }));
+
+
+  const shipmentsWithStatus = Array.isArray(shipmentList) ? shipmentList.map(s => ({
+  ...s,
+  status: getStatus(s.time) 
+})) : [];
 
   const q = searchQuery.toLowerCase();
  const filteredShipments = shipmentsWithStatus.filter((s) => {
@@ -373,13 +405,19 @@ useEffect(() => {
         onClose={handleCloseDialog}
         onAdd={(newShipment) => {
           if (!newShipment) return;
-          setShipmentList((prev) => {
-            const updated = [...prev, newShipment];
-            localStorage.setItem("shipments", JSON.stringify(updated));
-            return updated;
-          });
+          
+          // Calculate status for the new row so it matches the rest of the grid
+          const shipmentWithStatus = {
+            ...newShipment,
+            status: getStatus(newShipment.time)
+          };
+
+          // Update state directly (Database is already updated by the Dialog)
+          setShipmentList((prev) => [...prev, shipmentWithStatus]);
+          
           handleCloseDialog();
         }}
+        auth={auth} 
       />
 
     </div>

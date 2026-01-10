@@ -74,22 +74,30 @@ const Users = () => {
 
 
   const handleToggle = async (key, value) => {
-    const newSettings = { ...userSettings, [key]: value };
-    setUserSettings(newSettings);
+  
+  const newSettings = { ...userSettings, [key]: value };
+  setUserSettings(newSettings);
 
-    try {
-      await fetch(`${API_BASE_URL}/settings/${selectedUser.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.access_token}`,
-        },
-        body: JSON.stringify({ settings: newSettings }),
-      });
-    } catch (err) {
-      console.error("Failed to save settings:", err);
-    }
-  };
+  try {
+    const res = await fetch(`${API_BASE_URL}/settings/${selectedUser.id}`, {
+      method: "POST", 
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth.access_token}`,
+      },
+      body: JSON.stringify({ settings: newSettings }),
+    });
+
+    if (!res.ok) throw new Error("Failed to save to database");
+    
+    
+  } catch (err) {
+    console.error("Failed to save settings:", err);
+    alert("Could not save settings to database.");
+    
+    setUserSettings(userSettings); 
+  }
+};
 
   
 
@@ -140,19 +148,19 @@ const Users = () => {
       },
     });
 
-    // Safely parse JSON only if it exists
+    
     let data = null;
     try {
       data = await response.json();
     } catch (err) {
-      // the API returned no body — ignore
+      
     }
 
     if (!response.ok) {
       throw new Error(data?.message || "Unable to delete user");
     }
 
-    // Remove user from state
+    
     setUsers((prev) => prev.filter((user) => user.id !== userId));
   } catch (err) {
     alert(err.message);
@@ -245,7 +253,7 @@ const Users = () => {
               
                <DeleteOutlineIcon
                   onClick={(e) => {
-                    e.stopPropagation(); // prevent selecting user
+                    e.stopPropagation(); 
                     handleDeleteUser(user.id);
                   }}
                   style={{ color: "#d12b2bff", cursor: "pointer", marginRight: "100px" }}
