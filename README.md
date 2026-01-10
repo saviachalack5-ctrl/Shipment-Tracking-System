@@ -39,6 +39,10 @@ Add your Supabase credentials found in Settings > API in your env file.
 
 (Frontend): run npm run dev in the terminal of the frontend folder and click on the link below to open the app in your browser.
 
+finally log in with the credentials:
+email: admin@gmail.com
+password: admin123
+
 Author:
 Savia Chalak Taufiq
 Software engineering student.
