@@ -40,3 +40,6 @@ Download the folder and open it in VS Code.
 
 Open your browser to the local link (usually http://localhost:3000) and the app will be live.
 
+Author:
+Savia Chalak Taufiq
+Software engineering student.
