@@ -1,38 +1,20 @@
 
-INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, recovery_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
+INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, aud, role)
 VALUES (
-    '00000000-0000-0000-0000-000000000000',
     gen_random_uuid(),
-    'authenticated',
-    'authenticated',
     'admin@gmail.com',
-    crypt('admin123', gen_salt('bf')), 
-    now(),
-    now(),
+    crypt('admin123', gen_salt('bf')),
     now(),
     '{"provider":"email","providers":["email"]}',
     '{}',
-    false,
-    now(),
-    now(),
-    '',
-    '',
-    '',
-    ''
+    'authenticated',
+    'authenticated'
 ) ON CONFLICT (email) DO NOTHING;
 
 
-CREATE TABLE IF NOT EXISTS public.shipments (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    created_at TIMESTAMPTZ DEFAULT now(),
-    customer_name TEXT NOT NULL,
-    status TEXT DEFAULT 'Pending',
-    estimated_delivery DATE,
-    is_archived BOOLEAN DEFAULT false
-);
-
-CREATE TABLE IF NOT EXISTS public.user_settings (
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+    email TEXT,
     settings JSONB DEFAULT '{
         "status": true,
         "Actions": true,
@@ -44,9 +26,23 @@ CREATE TABLE IF NOT EXISTS public.user_settings (
     }'::jsonb
 );
 
+INSERT INTO public.profiles (id, email)
+SELECT id, email FROM auth.users WHERE email = 'admin@gmail.com'
+ON CONFLICT (id) DO NOTHING;
 
+
+CREATE TABLE IF NOT EXISTS public.shipments (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    customer_name TEXT NOT NULL,
+    status TEXT DEFAULT 'Pending',
+    estimated_delivery DATE,
+    is_archived BOOLEAN DEFAULT false
+);
+
+
+ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shipments DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_settings DISABLE ROW LEVEL SECURITY;
 
+GRANT ALL ON TABLE public.profiles TO anon, authenticated, service_role;
 GRANT ALL ON TABLE public.shipments TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.user_settings TO anon, authenticated, service_role;
