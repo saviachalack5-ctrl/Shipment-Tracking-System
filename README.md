@@ -32,13 +32,11 @@ Download the folder and open it in VS Code.
 
 (Backend): Open a terminal, cd into the backend folder, run npm install.
 
-(Frontend): Open a second terminal window, cd into the frontend folder.
+(Frontend): Open a second terminal window, cd into the frontend folder and run npm install on that too.
 
 (Backend): run node server.js in the terminal of the backend folder.
 
-(Frontend): run npm run dev in the terminal of the frontend folder.
-
-Open your browser to the local link (usually http://localhost:3000) and the app will be live.
+(Frontend): run npm run dev in the terminal of the frontend folder and click on the link below to open the app in your browser.
 
 Author:
 Savia Chalak Taufiq
