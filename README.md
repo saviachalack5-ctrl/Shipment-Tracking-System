@@ -1,41 +1,20 @@
 Shipment Tracking System
 
 This project is a shipment tracking system built with React for the frontend and Node.js for the backend. 
-It supports role-based access, admin-controlled user management, and shipment tracking functionality. 
-The system is runned locally and not hosted and is expandable.
+It supports role-based access, admin-controlled user management, and shipment tracking. 
 
 Project Overview:
 
-The application supports two roles: users and admin.
+The application supports two roles: users and one admin.
 
-Users can track shipments and view shipment details.
-Admins have elevated privileges that allow them to manage users and shipment data.
-Admin privileges are not hardcoded directly into the backend logic. 
-Instead, the system requires an initial setup step that designates a user as an admin. 
-This design ensures that admin access is controlled intentionally and cannot be gained through the frontend alone.
-Some application state is currently handled using local storage, while other parts rely on backend logic. 
-The system is structured so that missing pieces can be added incrementally without rewriting the core architecture.
+the admin can add users, and click on added users to find a check box, each one is a component of the website
+by unchecking each one the user selected wont be able to see that component when they log in.
 
-Admin Setup and Access Control:
+by clicking on the profile icon on the top right you can see the archived shipments and the users if you're an admin.
 
-The system supports one admin at a time.
+by clicking on the export buttons you can get the whole page and export it to either pdf or excel, applies to the shipments, report, and archived shipments.
 
-To create an admin:
-
-A user must first exist in the database.
-The make-admin script located in the backend login folder is executed.
-This script promotes the selected user to admin status.
-Only an existing admin can add new users and manage admin-level functionality.
-Access control is enforced by backend checks and by conditional rendering on the frontend. 
-Admin-only components are hidden from regular users and cannot be accessed without proper authorization.
-
-To use the access control:
-
-The user must be in the admin dashboard and create other users.
-By clicking on the profile icon on the top right a side bar will show.
-go to Users and make a second user account, then click on the user you made and you will see a list of checkboxes which are components of the website.
-You can uncheck any component and it won't show from that end user's side.
-This can be verified by logging out and logging in as the user.
+users cannot sign up independantly it is a requirement for an admin to add a user for that user to log in.
 
 Features:
 
@@ -56,46 +35,17 @@ Backend:
 Node.js
 Express
 
-
 Other:
-
-Local storage (for some client-side state)
-Database integration for user and shipment data
+Database integration for users, user settings(conditional component rendering and shipment data (supabase)
 Git and GitHub for version control
 
-Running the Project Locally
+the project link:
+https://shipment-tracking-system-wine.vercel.app/
 
-Frontend:
-Navigate to the frontend directory (login) and run:
+admin credentials-
 
-npm install
-npm run dev
-
-Backend:
-Navigate to the backend directory (login backend) and run:
-
-npm install
-node server.js
-
-Both the frontend and backend must be running for the application to function correctly.
-
-Architecture Notes:
-
-The project is structured with a clear separation between frontend and backend responsibilities. 
-Authentication, role checks, and admin promotion logic are handled on the backend.
-while the frontend focuses on user interaction and conditional rendering based on authorization state.
-
-Although some functionality currently relies on local storage, 
-the existing structure allows these parts to be migrated to full database-backed solutions without major refactoring.
-
-Limitations and Extensibility:
-
-This project is not deployed and is intended to run locally. While not production-ready, it is designed to be extensible. Future improvements could include:
-
-Expanding database usage to replace remaining local storage logic
-Supporting multiple admin accounts
-Adding stronger validation and error handling
-Improving persistence and security hardening
+email: admin@gmail.com
+password: admin123
 
 Author:
 
