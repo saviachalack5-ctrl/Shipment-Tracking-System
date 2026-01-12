@@ -4,7 +4,6 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { FileSpreadsheet, Download } from "lucide-react";
 
-
 const today = new Date().toLocaleDateString("en-GB", {
   day: "2-digit",
   month: "short",
@@ -24,7 +23,6 @@ const ExportReport = ({ data, columns, fileName = "report", exportTargetId }) =>
     XLSX.writeFile(wb, `${fileName}.xlsx`);
   };
 
-
   const exportPDF = async () => {
     const element = document.querySelector(`#${exportTargetId}`);
 
@@ -33,15 +31,10 @@ const ExportReport = ({ data, columns, fileName = "report", exportTargetId }) =>
       return;
     }
 
-
     const hiddenElements = document.querySelectorAll(".no-export");
     hiddenElements.forEach((el) => (el.style.display = "none"));
 
-
-    const headerImg = new Image();
-    headerImg.src = "/shipment.png"; 
-    await new Promise((resolve) => (headerImg.onload = resolve));
-
+    // Logic for loading header image removed as requested
 
     await new Promise((r) => setTimeout(r, 200));
     const canvas = await html2canvas(element, {
@@ -51,37 +44,34 @@ const ExportReport = ({ data, columns, fileName = "report", exportTargetId }) =>
       scrollY: -window.scrollY,
     });
 
-
     hiddenElements.forEach((el) => (el.style.display = ""));
 
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
-    const margin = 0;
-    const pageWidth = pdf.internal.pageSize.getWidth() - margin * 2;
-
-
-    const headerWidth = pageWidth;
-    const headerHeight = (headerImg.height / headerImg.width) * headerWidth;
-    pdf.addImage(headerImg, "PNG", 0, 0, headerWidth, headerHeight);
-
+    
+    // Adjusted Margins: 10mm padding from edges
+    const margin = 10; 
+    const pageWidth = pdf.internal.pageSize.getWidth() - (margin * 2);
 
     pdf.setFontSize(10);
-    pdf.text(`Date: ${today}`, pdf.internal.pageSize.getWidth() - 40, headerHeight - 8);
-
+    // Positioned date at the top right with a small margin
+    pdf.text(`Date: ${today}`, pdf.internal.pageSize.getWidth() - (margin + 30), margin);
 
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    const imgY = headerHeight + 2; 
-    pdf.addImage(imgData, "PNG", 0, imgY, imgWidth, imgHeight);
+    
+    // Set starting Y position to just below the date (margin + 5mm)
+    const imgY = margin + 5; 
+    
+    pdf.addImage(imgData, "PNG", margin, imgY, imgWidth, imgHeight);
 
     pdf.save(`${fileName}.pdf`);
   };
 
-
   return (
     <div style={{ display: "flex", gap: "10px" }}>
       <button
-      className="no-export"
+        className="no-export"
         onClick={exportPDF}
         style={{
           display: "flex",
